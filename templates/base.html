@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>{% block title %}CareerInsight{% endblock %}</title>
+    <title>{% block title %}자소서 메이트{% endblock %}</title>
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
@@ -49,25 +49,23 @@
 <header class="bg-primary fixed top-0 w-full z-50 shadow-[0px_4px_12px_rgba(30,58,138,0.08)]">
     <nav class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-16">
         <div class="flex items-center gap-stack-lg">
-            <a class="font-headline-md text-headline-md font-bold text-on-primary" href="{% url 'index' %}">CareerInsight</a>
+            <a class="font-headline-md text-headline-md font-bold text-on-primary" href="{% url 'index' %}">자소서 메이트</a>
             <div class="hidden md:flex gap-gutter items-center h-full">
-                <a class="text-on-primary font-bold pb-1 font-body-md text-body-md" href="{% url 'index' %}">Home</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">Company Analysis</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">Job Matching</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">My Spec</a>
+                <a class="text-on-primary font-bold pb-1 font-body-md text-body-md" href="{% url 'index' %}">홈</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">기업 분석</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">직무 매칭</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">내 스펙</a>
             </div>
         </div>
         
         <div class="flex items-center gap-stack-md">
             {% if user.is_authenticated %}
                 <button class="material-symbols-outlined text-on-primary p-2 hover:bg-primary-fixed/10 rounded-full transition-all active:scale-95">notifications</button>
-                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed/20">
-                    <img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW-ZMvhI_qcdO5VExQunaE7udanczzNOm7j8Rulxt8hQqrfBhWmWvgf43q8Wg8384kR1u7gu6jZmPqDtCA1hKXVaGYPPY8IJMnVtQOfgDdL_gvuuk8tkWunw536PWZD0rHI_0S0ybPbtlgw27xJagn4-vtSr6y9NsDANyObLDeu8uX3zyw0Mcek_wuLWllO53rVSDEdcWqkC___zhfrI0R9xHGW0xUMSGBMkcNdg6CzKqVUrSgBFkkbA_Mc-79B94uiMBjoB9wKjtM"/>
-                </div>
-                <a href="#" class="text-on-primary/70 hover:text-on-primary text-sm transition-colors">로그아웃</a>
+                <a href="{% url 'accounts:profile_update' %}" class="text-on-primary font-bold text-sm transition-colors">{{ user.username }}님</a> {# 사용자 이름 표시 및 프로필 링크 #}
+                <a href="{% url 'accounts:logout' %}" class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-all">로그아웃</a> {# 로그아웃 버튼을 더 명확하게 #}
             {% else %}
-                <a href="#" class="text-on-primary/80 hover:text-on-primary font-bold text-sm transition-colors">로그인</a>
-                <a href="#" class="px-4 py-2 bg-secondary text-on-secondary rounded-lg text-sm font-bold hover:bg-secondary-container transition-all">회원가입</a>
+                <a href="{% url 'accounts:login' %}" class="text-on-primary/80 hover:text-on-primary font-bold text-sm transition-colors">로그인</a>
+                <a href="{% url 'accounts:signup' %}" class="px-4 py-2 bg-secondary text-on-secondary rounded-lg text-sm font-bold hover:bg-secondary-container transition-all">회원가입</a>
             {% endif %}
         </div>
     </nav>
@@ -81,14 +79,14 @@
 <footer class="bg-surface-container-highest mt-20">
     <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-desktop py-stack-lg max-w-container-max mx-auto border-t border-outline-variant">
         <div class="mb-stack-md md:mb-0">
-            <div class="font-title-lg text-title-lg font-bold text-primary mb-2">CareerInsight</div>
-            <p class="text-on-surface-variant font-body-sm text-body-sm">© 2026 CareerInsight. Expert Career Solutions.</p>
+            <div class="font-title-lg text-title-lg font-bold text-primary mb-2">자소서 메이트</div>
+            <p class="text-on-surface-variant font-body-sm text-body-sm">© 2026 자소서 메이트. 당신의 커리어 솔루션.</p>
         </div>
         <div class="flex flex-wrap justify-center gap-gutter">
-            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">Privacy Policy</a>
-            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">Terms of Service</a>
-            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">Contact Us</a>
-            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">About AI Matching</a>
+            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">개인정보처리방침</a>
+            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">이용약관</a>
+            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">문의하기</a>
+            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">AI 매칭 정보</a>
         </div>
     </div>
 </footer>

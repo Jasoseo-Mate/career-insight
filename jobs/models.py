@@ -7,11 +7,7 @@ class Skill(models.Model):
     def __str__(self):
         return self.name
 
-class UserSpec(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='spec')
-    education = models.CharField(max_length=100)          # 학력 정보
-    language_score = models.IntegerField(default=0)       # 어학 성적 점수
-    skills = models.ManyToManyField(Skill, related_name='users')  # 보유 기술 스택
+
 
 class JobPost(models.Model):
     company_name = models.CharField(max_length=100)       # 기업명

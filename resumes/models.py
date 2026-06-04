@@ -1,3 +1,35 @@
 from django.db import models
+from django.conf import settings
+from jobs.models import JobPost # Import JobPost model
 
-# Create your models here.
+class Experience(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='experiences')
+    title = models.CharField(max_length=100)
+    company = models.CharField(max_length=100)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return f'{self.title} at {self.company}'
+
+class Resume(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='resumes')
+    title = models.CharField(max_length=200)
+    content = models.TextField(blank=True) # For storing structured resume data or text
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.user.username}\'s Resume: {self.title}'
+
+class CoverLetter(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cover_letters')
+    job_post = models.ForeignKey(JobPost, on_delete=models.CASCADE, related_name='cover_letters')
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.user.username}\'s Cover Letter for {self.job_post.title}'

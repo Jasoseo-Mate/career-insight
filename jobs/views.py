@@ -2,22 +2,53 @@
 from django.http import JsonResponse
 from .models import JobPost
 from django.shortcuts import render
-
+from accounts.models import Profile # Profile 모델 임포트
+from resumes.models import Experience # Experience 모델 임포트
+from django.contrib.auth.decorators import login_required # login_required 데코레이터 임포트
+from django.conf import settings # settings 임포트
 
 # 1. 메인 랜딩 페이지 뷰
 def index(request):
     return render(request, 'jobs/index.html')
 
 # 2. 사용자 마이 대시보드 뷰
+@login_required # dashboard 뷰에 login_required 데코레이터 추가
 def dashboard(request):
-    return render(request, 'jobs/dashboard.html')
+    user_skills = []
+    try:
+        profile = request.user.profile
+        user_skills = profile.skills.values_list('name', flat=True)
+    except Profile.DoesNotExist:
+        pass # 프로필이 없는 경우 빈 리스트 유지
+    
+    context = {
+        'user_skills': user_skills
+    }
+    return render(request, 'jobs/dashboard.html', context)
 
-# 💡 로그인 문지기(@login_required)는 완전히 제외했습니다.
+@login_required # 사용자 로그인 확인
 def recommended_jobs(request):
+    user = request.user
+    user_skills = set()
     
-    # 1. 🛠️ [임시 조치] 로그인 기능이 없으므로, 내 스킬셋을 강제로 지정합니다.
-    user_skills = {'Python', 'Django'}  
-    
+    # 사용자 Profile에서 스킬 정보 가져오기
+    try:
+        profile = user.profile # related_name 'profile'을 통해 접근
+        user_skills = set(profile.skills.values_list('name', flat=True))
+    except Profile.DoesNotExist:
+        # 사용자 프로필이 아직 없는 경우 처리 (예: 신규 사용자)
+        # 현재는 빈 user_skills로 진행하지만, 더 견고한
+        # 해결책은 프로필 생성 페이지로 리디렉션하거나 메시지를 표시하는 것입니다.
+        pass
+        
+    # 사용자 스킬이 정의되지 않은 경우 적절한 메시지 반환
+    if not user_skills:
+        return JsonResponse({
+            'status': 'info',
+            'message': '프로필에 스킬 정보가 없습니다. 추천을 받으려면 스킬을 추가해주세요.',
+            'jobs': []
+        }, json_dumps_params={'ensure_ascii': False})
+
     recommendations = []
     all_jobs = JobPost.objects.prefetch_related('required_skills').all()
     
@@ -78,6 +109,20 @@ def company_analysis(request):
     # 나중에 만들 html 파일 이름
     return render(request, 'jobs/company.html')
 
+@login_required # 사용자 로그인 확인
 def my_spec(request):
-    # 나중에 만들 html 파일 이름
-    return render(request, 'jobs/myspec.html')
+    profile = None
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        pass # 프로필이 없는 경우
+
+    experiences = []
+    if request.user.is_authenticated:
+        experiences = request.user.experiences.all() # related_name 'experiences'
+
+    context = {
+        'profile': profile,
+        'experiences': experiences
+    }
+    return render(request, 'jobs/myspec.html', context)
