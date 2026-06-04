@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html class="light" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}CareerInsight{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a", "surface-bright": "#f8f9fb", "on-error-container": "#93000a", "tertiary-fixed-dim": "#4edea3",
+                        "surface-container-high": "#e7e8ea", "surface-container-low": "#f3f4f6", "on-tertiary-container": "#27c38a",
+                        "secondary-container": "#2170e4", "on-primary-container": "#90a8ff", "inverse-surface": "#2e3132",
+                        "on-primary-fixed": "#00164e", "inverse-on-surface": "#f0f1f3", "on-background": "#191c1e",
+                        "on-tertiary-fixed": "#002113", "secondary-fixed": "#d8e2ff", "secondary-fixed-dim": "#adc6ff",
+                        "surface": "#f8f9fb", "surface-dim": "#d9dadc", "background": "#f8f9fb", "on-surface-variant": "#444651",
+                        "secondary": "#0058be", "tertiary-fixed": "#6ffbbe", "on-primary-fixed-variant": "#264191",
+                        "inverse-primary": "#b6c4ff", "on-secondary-container": "#fefcff", "primary": "#00236f",
+                        "surface-container-lowest": "#ffffff", "tertiary": "#00311f", "primary-fixed-dim": "#b6c4ff",
+                        "on-secondary-fixed": "#001a42", "outline-variant": "#c5c5d3", "surface-container": "#edeef0",
+                        "outline": "#757682", "on-error": "#ffffff", "error-container": "#ffdad6", "on-primary": "#ffffff",
+                        "tertiary-container": "#004a31", "on-secondary": "#ffffff", "primary-container": "#1e3a8a",
+                        "surface-container-highest": "#e1e2e4", "on-secondary-fixed-variant": "#004395", "primary-fixed": "#dce1ff",
+                        "surface-variant": "#e1e2e4", "surface-tint": "#4059aa", "on-tertiary": "#ffffff", "on-surface": "#191c1e", "on-tertiary-fixed-variant": "#005236"
+                    },
+                    "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    "spacing": { "margin-mobile": "16px", "stack-lg": "32px", "gutter": "24px", "stack-sm": "8px", "base": "8px", "stack-md": "16px", "margin-desktop": "40px", "container-max": "1280px" },
+                    "fontFamily": { "body-sm": ["Inter"], "headline-lg": ["Inter"], "display": ["Inter"], "headline-md": ["Inter"], "body-lg": ["Inter"], "label-md": ["Inter"], "body-md": ["Inter"], "title-lg": ["Inter"], "headline-lg-mobile": ["Inter"] },
+                    "fontSize": { "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}], "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}], "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}], "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}], "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}], "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}], "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}], "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}] }
+                }
+            }
+        };
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; line-height: 1; text-transform: none; letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr; }
+        body { background-color: #f8f9fb; color: #191c1e; font-family: 'Inter', sans-serif; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="font-body-md text-body-md bg-background text-on-surface selection:bg-secondary-fixed">
+
+<header class="bg-primary fixed top-0 w-full z-50 shadow-[0px_4px_12px_rgba(30,58,138,0.08)]">
+    <nav class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-16">
+        <div class="flex items-center gap-stack-lg">
+            <a class="font-headline-md text-headline-md font-bold text-on-primary" href="{% url 'index' %}">CareerInsight</a>
+            <div class="hidden md:flex gap-gutter items-center h-full">
+                <a class="text-on-primary font-bold pb-1 font-body-md text-body-md" href="{% url 'index' %}">Home</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">Company Analysis</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">Job Matching</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">My Spec</a>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-stack-md">
+            {% if user.is_authenticated %}
+                <button class="material-symbols-outlined text-on-primary p-2 hover:bg-primary-fixed/10 rounded-full transition-all active:scale-95">notifications</button>
+                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed/20">
+                    <img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW-ZMvhI_qcdO5VExQunaE7udanczzNOm7j8Rulxt8hQqrfBhWmWvgf43q8Wg8384kR1u7gu6jZmPqDtCA1hKXVaGYPPY8IJMnVtQOfgDdL_gvuuk8tkWunw536PWZD0rHI_0S0ybPbtlgw27xJagn4-vtSr6y9NsDANyObLDeu8uX3zyw0Mcek_wuLWllO53rVSDEdcWqkC___zhfrI0R9xHGW0xUMSGBMkcNdg6CzKqVUrSgBFkkbA_Mc-79B94uiMBjoB9wKjtM"/>
+                </div>
+                <a href="#" class="text-on-primary/70 hover:text-on-primary text-sm transition-colors">로그아웃</a>
+            {% else %}
+                <a href="#" class="text-on-primary/80 hover:text-on-primary font-bold text-sm transition-colors">로그인</a>
+                <a href="#" class="px-4 py-2 bg-secondary text-on-secondary rounded-lg text-sm font-bold hover:bg-secondary-container transition-all">회원가입</a>
+            {% endif %}
+        </div>
+    </nav>
+</header>
+
+<div class="pt-16">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<footer class="bg-surface-container-highest mt-20">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-desktop py-stack-lg max-w-container-max mx-auto border-t border-outline-variant">
+        <div class="mb-stack-md md:mb-0">
+            <div class="font-title-lg text-title-lg font-bold text-primary mb-2">CareerInsight</div>
+            <p class="text-on-surface-variant font-body-sm text-body-sm">© 2026 CareerInsight. Expert Career Solutions.</p>
+        </div>
+        <div class="flex flex-wrap justify-center gap-gutter">
+            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">Privacy Policy</a>
+            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">Terms of Service</a>
+            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">Contact Us</a>
+            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">About AI Matching</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    const observerOptions = { threshold: 0.1 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('opacity-100', 'translate-y-0');
+                entry.target.classList.remove('opacity-0', 'translate-y-10');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('section > div > div').forEach(el => {
+        el.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-10');
+        observer.observe(el);
+    });
+</script>
+{% block extra_script %}{% endblock %}
+</body>
+</html>

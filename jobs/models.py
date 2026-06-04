@@ -1,0 +1,20 @@
+from django.db import models
+from django.conf import settings
+
+class Skill(models.Model):
+    name = models.CharField(max_length=50, unique=True)  # 예: 'Python', 'Vue.js', 'Django'
+
+    def __str__(self):
+        return self.name
+
+class UserSpec(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='spec')
+    education = models.CharField(max_length=100)          # 학력 정보
+    language_score = models.IntegerField(default=0)       # 어학 성적 점수
+    skills = models.ManyToManyField(Skill, related_name='users')  # 보유 기술 스택
+
+class JobPost(models.Model):
+    company_name = models.CharField(max_length=100)       # 기업명
+    title = models.CharField(max_length=200)              # 공고 제목
+    description = models.TextField()                     # 직무 설명
+    required_skills = models.ManyToManyField(Skill, related_name='jobs') # 요구 기술 스택

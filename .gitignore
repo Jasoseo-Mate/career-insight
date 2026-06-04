@@ -1,0 +1,16 @@
+# Python 관련 자동 생성 파일들
+__pycache__/
+*.py[cod]
+
+# 가상환경 폴더 (제일 중요! 이거 안 하면 git add 할 때 수천 개씩 뜬다)
+venv/
+.venv/
+env/
+
+# 개발 환경용 데이터베이스나 설정 파일
+db.sqlite3
+.env
+
+# OS가 만드는 임시 파일
+.DS_Store
+Thumbs.db
