@@ -40,6 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.kakao',
+    'allauth.socialaccount.providers.naver',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +56,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -131,4 +140,51 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/jobs/dashboard/' # 로그인 성공 후 리디렉션될 URL
 LOGOUT_REDIRECT_URL = '/' # 로그아웃 후 리디렉션될 URL
+
+# Allauth settings
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SITE_ID = 1
+
+ACCOUNT_LOGIN_METHODS = ['username', 'email']
+ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_PASSWORD_MIN_LENGTH = 8
+
+# Social account providers
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': 'YOUR_GOOGLE_CLIENT_ID',
+            'secret': 'YOUR_GOOGLE_SECRET',
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'offline',
+        }
+    },
+    'kakao': {
+        'APP': {
+            'client_id': 'YOUR_KAKAO_CLIENT_ID',
+            'secret': 'YOUR_KAKAO_SECRET', # Kakao doesn't always use a secret, but good to include if it's there
+            'key': ''
+        }
+    },
+    'naver': {
+        'APP': {
+            'client_id': 'YOUR_NAVER_CLIENT_ID',
+            'secret': 'YOUR_NAVER_SECRET',
+            'key': ''
+        }
+    }
+}
+
 

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}프로필 대시보드 - 자소서 메이트{% endblock %}
+
+{% block content %}
+<div class="bg-slate-50 min-h-screen">
+    <div class="max-w-4xl mx-auto p-4 md:p-8 space-y-8">
+
+        <h1 class="text-3xl font-bold text-slate-800">프로필 관리</h1>
+
+        <!-- Profile Form (Bio and Skills) -->
+        <div class="bg-white p-6 rounded-xl shadow-md transition-all hover:shadow-lg">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Bio Section -->
+                <div>
+                    <label for="{{ form.bio.id_for_label }}" class="block text-lg font-bold text-gray-800 mb-2">한 줄 소개</label>
+                    {{ form.bio }}
+                    <p class="mt-2 text-sm text-gray-500">다른 사용자에게 보일 당신의 전문성을 한 문장으로 요약해주세요.</p>
+                </div>
+
+                <!-- Skills Section -->
+                <div>
+                    <label class="block text-lg font-bold text-gray-800 mb-2">보유 기술</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4 bg-slate-50 rounded-lg border">
+                        {% for skill_choice in form.skills %}
+                            <label for="{{ skill_choice.id_for_label }}" 
+                                   class="flex items-center p-3 rounded-lg transition-all cursor-pointer hover:bg-blue-100 has-[:checked]:bg-blue-200 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
+                                {{ skill_choice.tag }}
+                                <span class="ml-2 font-medium text-slate-700">{{ skill_choice.choice_label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="submit"
+                            class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all active:scale-95">
+                        프로필 저장
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200"></div>
+
+        <!-- Education Section -->
+        <div class="bg-white p-6 rounded-xl shadow-md transition-all hover:shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">학력 사항</h2>
+                <a href="{% url 'accounts:education_add' %}" class="px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-all active:scale-95 shadow-sm hover:shadow-md">
+                    + 추가
+                </a>
+            </div>
+            <div class="space-y-4">
+                {% for edu in educations %}
+                    <div class="p-4 border rounded-lg flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <div>
+                            <p class="font-bold text-slate-800">{{ edu.school_name }}</p>
+                            <p class="text-sm text-gray-600">{{ edu.major }} - {{ edu.degree }}</p>
+                            <p class="text-xs text-gray-500">{{ edu.start_date|date:"Y.m" }} ~ {{ edu.end_date|date:"Y.m"|default:"재학중" }}</p>
+                        </div>
+                        <div class="space-x-4">
+                            <a href="{% url 'accounts:education_edit' edu.pk %}" class="font-medium text-blue-600 hover:underline">수정</a>
+                            <a href="{% url 'accounts:education_delete' edu.pk %}" class="font-medium text-red-600 hover:underline">삭제</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 text-center py-4">등록된 학력 정보가 없습니다.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Certificate Section -->
+        <div class="bg-white p-6 rounded-xl shadow-md transition-all hover:shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">자격증</h2>
+                <a href="{% url 'accounts:certificate_add' %}" class="px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-all active:scale-95 shadow-sm hover:shadow-md">
+                    + 추가
+                </a>
+            </div>
+            <div class="space-y-4">
+                {% for cert in certificates %}
+                     <div class="p-4 border rounded-lg flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <div>
+                            <p class="font-bold text-slate-800">{{ cert.name }}</p>
+                            <p class="text-sm text-gray-600">{{ cert.issuer }} ({{ cert.date_acquired|date:"Y.m" }})</p>
+                        </div>
+                        <div class="space-x-4">
+                            <a href="{% url 'accounts:certificate_edit' cert.pk %}" class="font-medium text-blue-600 hover:underline">수정</a>
+                            <a href="{% url 'accounts:certificate_delete' cert.pk %}" class="font-medium text-red-600 hover:underline">삭제</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 text-center py-4">등록된 자격증 정보가 없습니다.</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Activity Section -->
+        <div class="bg-white p-6 rounded-xl shadow-md transition-all hover:shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">대외활동</h2>
+                <a href="{% url 'accounts:activity_add' %}" class="px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-all active:scale-95 shadow-sm hover:shadow-md">
+                    + 추가
+                </a>
+            </div>
+            <div class="space-y-4">
+                {% for act in activities %}
+                    <div class="p-4 border rounded-lg flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <div>
+                            <p class="font-bold text-slate-800">{{ act.title }}</p>
+                            <p class="text-xs text-gray-500">{{ act.start_date|date:"Y.m" }} ~ {{ act.end_date|date:"Y.m"|default:"진행중" }}</p>
+                        </div>
+                        <div class="space-x-4">
+                            <a href="{% url 'accounts:activity_edit' act.pk %}" class="font-medium text-blue-600 hover:underline">수정</a>
+                            <a href="{% url 'accounts:activity_delete' act.pk %}" class="font-medium text-red-600 hover:underline">삭제</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 text-center py-4">등록된 대외활동 정보가 없습니다.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Project Section -->
+        <div class="bg-white p-6 rounded-xl shadow-md transition-all hover:shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">프로젝트</h2>
+                <a href="{% url 'accounts:project_add' %}" class="px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-all active:scale-95 shadow-sm hover:shadow-md">
+                    + 추가
+                </a>
+            </div>
+            <div class="space-y-4">
+                {% for proj in projects %}
+                    <div class="p-4 border rounded-lg flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <div>
+                            <p class="font-bold text-slate-800">{{ proj.title }}</p>
+                            <p class="text-xs text-gray-500">{{ proj.start_date|date:"Y.m" }} ~ {{ proj.end_date|date:"Y.m"|default:"진행중" }}</p>
+                        </div>
+                        <div class="space-x-4">
+                            <a href="{% url 'accounts:project_edit' proj.pk %}" class="font-medium text-blue-600 hover:underline">수정</a>
+                            <a href="{% url 'accounts:project_delete' proj.pk %}" class="font-medium text-red-600 hover:underline">삭제</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 text-center py-4">등록된 프로젝트 정보가 없습니다.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

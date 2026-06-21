@@ -1,11 +1,57 @@
 {% extends 'base.html' %}
+{% load socialaccount %}
 
 {% block title %}회원가입 - 자소서 메이트{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md mt-10 text-center">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">회원가입</h1>
-    <p class="text-gray-700 mb-4">회원가입 기능은 현재 준비 중입니다.</p>
-    <a href="{% url 'accounts:login' %}" class="text-blue-600 hover:underline">로그인 페이지로 돌아가기</a>
+<div class="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">회원가입</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+            <div>
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <p class="mt-1 text-sm text-gray-500 italic">{{ field.help_text|safe }}</p>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p class="mt-2 text-sm text-red-600 font-semibold">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        {% if form.non_field_errors %}
+            <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+                {% for error in form.non_field_errors %}
+                    <span class="font-medium">오류:</span> {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">회원가입</button>
+    </form>
+
+    <div class="mt-6 text-center">
+        <div class="relative flex py-5 items-center">
+            <div class="flex-grow border-t border-gray-400"></div>
+            <span class="flex-shrink mx-4 text-gray-400">또는</span>
+            <div class="flex-grow border-t border-gray-400"></div>
+        </div>
+        <div class="space-y-3">
+            <a href="{% provider_login_url 'google' %}" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Google로 회원가입
+            </a>
+            <a href="{% provider_login_url 'kakao' %}" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-400 hover:bg-yellow-500">
+                카카오로 회원가입
+            </a>
+            <a href="{% provider_login_url 'naver' %}" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600">
+                네이버로 회원가입
+            </a>
+        </div>
+    </div>
+
+    <p class="mt-6 text-center text-sm text-gray-600">
+        이미 계정이 있으신가요?
+        <a href="{% url 'accounts:login' %}" class="font-medium text-blue-600 hover:text-blue-500">로그인</a>
+    </p>
 </div>
 {% endblock %}
