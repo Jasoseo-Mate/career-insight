@@ -1,0 +1,466 @@
+{% extends 'base.html' %}
+
+{% block title %}AI 매칭 및 자소서 메이트 - 자소서 메이트{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- 헤더 섹션: 그라디언트 배경과 타이틀 -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-primary-container via-secondary-container to-primary rounded-2xl p-8 md:p-12 shadow-xl mb-10 text-white animate-fade-in">
+        <div class="relative z-10 max-w-2xl">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 text-primary-fixed mb-4 backdrop-blur-md">
+                <span class="material-symbols-outlined text-sm">smart_toy</span> AI 맞춤 서비스
+            </span>
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 font-display leading-tight">
+                AI 매칭 & 자소서 메이트
+            </h1>
+            <p class="text-base md:text-lg text-primary-fixed/90 leading-relaxed font-body-md">
+                등록된 학력, 자격증, 기술 스택, 프로젝트 및 대외활동 경험을 AI가 입체적으로 분석하여 가장 매칭률이 높은 기업을 추천하고 자기소개서 초안을 맞춤 제작해 드립니다.
+            </p>
+        </div>
+        <!-- 우측 배경 꾸미기용 유리 구체 형태 -->
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+    </div>
+
+    <!-- 메인 대시보드 콘텐트 영역 -->
+    <div id="ai-main-container" class="space-y-10">
+        <!-- 상태 1: 스펙 분석 전 초기 상태 -->
+        <div id="status-initial" class="flex flex-col items-center justify-center p-12 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm text-center">
+            <div class="w-20 h-20 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary mb-6 shadow-inner">
+                <span class="material-symbols-outlined text-4xl">analytics</span>
+            </div>
+            <h2 class="text-2xl font-bold text-on-surface mb-2 font-headline-md">나만의 인공지능 커리어 컨설팅</h2>
+            <p class="text-on-surface-variant max-w-lg mb-8 text-body-md">
+                현재까지 작성된 회원님의 소중한 이력서 데이터와 스펙(보유 스킬, 프로젝트, 교육 이력 등)을 취합하여 정밀 분석을 실시합니다.
+            </p>
+            <button id="btn-start-analysis" class="inline-flex items-center gap-2 px-8 py-3.5 bg-secondary text-white font-bold rounded-xl shadow-md hover:bg-secondary-container hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+                <span class="material-symbols-outlined text-xl">bolt</span> AI 분석 및 매칭 시작하기
+            </button>
+        </div>
+
+        <!-- 상태 2: 로딩 상태 -->
+        <div id="status-loading" class="hidden flex flex-col items-center justify-center p-20 bg-surface-container-lowest border border-outline-variant rounded-2xl text-center">
+            <div class="relative w-24 h-24 mb-6">
+                <!-- 원형 로더 테두리 -->
+                <div class="absolute inset-0 border-4 border-secondary/20 rounded-full"></div>
+                <!-- 회전하는 파란색 아크 -->
+                <div class="absolute inset-0 border-4 border-transparent border-t-secondary rounded-full animate-spin"></div>
+                <!-- 정중앙 로봇 아이콘 -->
+                <div class="absolute inset-0 flex items-center justify-center text-secondary">
+                    <span class="material-symbols-outlined text-3xl animate-pulse">psychology</span>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-on-surface mb-2 animate-pulse">스펙 데이터를 수집하고 분석하는 중...</h3>
+            <p class="text-on-surface-variant max-w-md text-sm">
+                AI가 회원님의 학력, 프로젝트 성과, 보유 스킬 간의 매칭 시너지를 계산하고 있습니다. 약 10~15초 정도 소요될 수 있습니다.
+            </p>
+        </div>
+
+        <!-- 상태 3: 분석 완료 상태 (결과 창) -->
+        <div id="status-result" class="hidden space-y-10 animate-fade-in">
+            <!-- 3-1: 전체 강점 분석 리포트 -->
+            <div class="bg-surface-container-low border border-outline-variant p-6 md:p-8 rounded-2xl shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center text-secondary">
+                        <span class="material-symbols-outlined">description_is_similarity</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-on-surface font-title-lg">AI 종합 강점 진단서</h3>
+                </div>
+                <div class="border-l-4 border-secondary pl-4 py-2">
+                    <p id="result-overall-analysis" class="text-on-surface-variant text-body-md leading-relaxed whitespace-pre-wrap">
+                        <!-- 강점 요약이 들어갈 곳 -->
+                    </p>
+                </div>
+            </div>
+
+            <!-- 3-2: 추천 기업 카드 섹션 -->
+            <div>
+                <h3 class="text-2xl font-bold text-on-surface mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">domain</span> 스펙 맞춤 추천 IT 기업
+                </h3>
+                <div id="recommended-companies-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- 기업 카드들이 동적으로 생성됩니다. -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 팝업 모달: 자기소개서 생성 및 편집 화면 -->
+<div id="coverletter-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl animate-scale-up">
+        <!-- 모달 헤더 -->
+        <div class="px-6 py-4 bg-surface-container border-b border-outline-variant flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">history_edu</span>
+                <h3 class="text-lg font-bold text-on-surface font-title-lg">AI 자기소개서 메이트</h3>
+            </div>
+            <button id="btn-close-modal" class="text-on-surface-variant hover:text-on-surface transition-colors">
+                <span class="material-symbols-outlined text-2xl">close</span>
+            </button>
+        </div>
+
+        <!-- 모달 바디 -->
+        <div class="p-6 space-y-6">
+            <!-- 정보 표기 -->
+            <div class="grid grid-cols-2 gap-4 bg-surface-container-low p-4 rounded-xl text-sm border border-outline-variant">
+                <div>
+                    <span class="text-on-surface-variant block text-xs font-semibold uppercase">추천 기업</span>
+                    <strong id="modal-company-name" class="text-on-surface text-base">기업명</strong>
+                </div>
+                <div>
+                    <span class="text-on-surface-variant block text-xs font-semibold uppercase">추천 직무</span>
+                    <strong id="modal-role-name" class="text-on-surface text-base">직무명</strong>
+                </div>
+            </div>
+
+            <!-- 문항 입력/선택 섹션 -->
+            <div class="space-y-2">
+                <label for="modal-question-input" class="block text-sm font-semibold text-on-surface">작성할 자소서 질문 문항</label>
+                <textarea id="modal-question-input" rows="2" class="w-full border border-outline rounded-xl p-3 text-sm focus:ring-2 focus:ring-secondary focus:outline-none placeholder-outline" placeholder="예: 지원동기 및 입사 후 포부를 작성해 주세요."></textarea>
+            </div>
+
+            <!-- 생성 전/로딩 상태 -->
+            <div id="modal-generation-loading" class="hidden flex flex-col items-center justify-center py-10 bg-surface-container-lowest border border-dashed border-outline rounded-xl text-center">
+                <div class="w-12 h-12 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin mb-4"></div>
+                <h4 class="text-base font-bold text-on-surface mb-1">AI 자소서 초안 작성 중...</h4>
+                <p class="text-on-surface-variant text-xs max-w-xs">
+                    회원님의 핵심 프로젝트와 강점 경험을 유기적으로 엮어 스토리라인을 구성하고 있습니다. 잠시만 기다려 주세요.
+                </p>
+            </div>
+
+            <!-- 생성 완료 및 편집 에디터 영역 -->
+            <div id="modal-editor-area" class="hidden space-y-2">
+                <div class="flex justify-between items-center">
+                    <label for="modal-content-editor" class="block text-sm font-semibold text-on-surface">생성된 자기소개서 초안 (직접 편집 가능)</label>
+                    <span id="char-counter" class="text-xs text-on-surface-variant">0 자</span>
+                </div>
+                <textarea id="modal-content-editor" rows="12" class="w-full border border-outline rounded-xl p-4 text-sm font-mono focus:ring-2 focus:ring-secondary focus:outline-none leading-relaxed"></textarea>
+            </div>
+        </div>
+
+        <!-- 모달 푸터 -->
+        <div class="px-6 py-4 bg-surface-container border-t border-outline-variant flex justify-between gap-4">
+            <button id="btn-close-modal-cancel" class="px-5 py-2.5 border border-outline text-on-surface font-semibold rounded-xl hover:bg-surface-container-high transition-all text-sm">
+                취소
+            </button>
+            <div class="flex gap-2">
+                <button id="btn-generate-draft" class="px-5 py-2.5 bg-secondary text-white font-semibold rounded-xl hover:bg-secondary-container hover:-translate-y-0.5 active:translate-y-0 shadow-sm transition-all text-sm flex items-center gap-1">
+                    <span class="material-symbols-outlined text-lg">auto_awesome</span> 초안 생성하기
+                </button>
+                <button id="btn-save-draft" class="hidden px-5 py-2.5 bg-tertiary-container text-on-tertiary-container font-semibold rounded-xl hover:bg-tertiary hover:text-white hover:-translate-y-0.5 active:translate-y-0 shadow-sm transition-all text-sm flex items-center gap-1">
+                    <span class="material-symbols-outlined text-lg">save</span> 내 자소서에 저장
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 토스트 알림창 -->
+<div id="toast-message" class="fixed bottom-5 right-5 z-50 hidden bg-inverse-surface text-inverse-on-surface px-6 py-3.5 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300 transform translate-y-10 opacity-0">
+    <span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span>
+    <span id="toast-text" class="text-sm font-semibold">저장되었습니다!</span>
+</div>
+
+<style>
+    /* 미크로 애니메이션 효과 */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scaleUp {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .animate-scale-up {
+        animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnStartAnalysis = document.getElementById('btn-start-analysis');
+        const statusInitial = document.getElementById('status-initial');
+        const statusLoading = document.getElementById('status-loading');
+        const statusResult = document.getElementById('status-result');
+        
+        const resultOverallAnalysis = document.getElementById('result-overall-analysis');
+        const recommendedCompaniesGrid = document.getElementById('recommended-companies-grid');
+
+        // 모달 및 에디터 요소
+        const modal = document.getElementById('coverletter-modal');
+        const btnCloseModal = document.getElementById('btn-close-modal');
+        const btnCloseModalCancel = document.getElementById('btn-close-modal-cancel');
+        const modalCompanyName = document.getElementById('modal-company-name');
+        const modalRoleName = document.getElementById('modal-role-name');
+        const modalQuestionInput = document.getElementById('modal-question-input');
+        
+        const modalGenerationLoading = document.getElementById('modal-generation-loading');
+        const modalEditorArea = document.getElementById('modal-editor-area');
+        const modalContentEditor = document.getElementById('modal-content-editor');
+        const charCounter = document.getElementById('char-counter');
+        
+        const btnGenerateDraft = document.getElementById('btn-generate-draft');
+        const btnSaveDraft = document.getElementById('btn-save-draft');
+
+        // 상태값 관리
+        let selectedCompany = "";
+        let selectedRole = "";
+
+        // CSRF Token 가져오기 함수
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // 토스트 띄우기 함수
+        function showToast(text, isError = false) {
+            const toast = document.getElementById('toast-message');
+            const toastText = document.getElementById('toast-text');
+            const icon = toast.querySelector('.material-symbols-outlined');
+            
+            toastText.textContent = text;
+            if (isError) {
+                icon.textContent = "error";
+                icon.className = "material-symbols-outlined text-error";
+            } else {
+                icon.textContent = "check_circle";
+                icon.className = "material-symbols-outlined text-tertiary-fixed-dim";
+            }
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }, 3500);
+        }
+
+        // 1. AI 스펙 분석 시작
+        btnStartAnalysis.addEventListener('click', function() {
+            statusInitial.classList.add('hidden');
+            statusLoading.classList.remove('hidden');
+
+            fetch("{% url 'jobs:ai_analyze_spec' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.message || "서버 통신 실패"); });
+                }
+                return res.json();
+            })
+            .then(response => {
+                statusLoading.classList.add('hidden');
+                statusResult.classList.remove('hidden');
+
+                if (response.status === 'success') {
+                    const data = response.data;
+                    
+                    // 강점 분석 진단서 주입
+                    resultOverallAnalysis.textContent = data.overall_analysis;
+                    
+                    // 추천 기업 카드 리스트 생성
+                    recommendedCompaniesGrid.innerHTML = "";
+                    data.recommended_companies.forEach(company => {
+                        const card = document.createElement('div');
+                        card.className = "flex flex-col p-6 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 animate-fade-in";
+                        
+                        // 문항 목록 HTML 생성
+                        let questionsHtml = "";
+                        company.recommended_questions.forEach((q, idx) => {
+                            questionsHtml += `
+                                <li class="group/item flex items-start gap-2 p-2.5 rounded-lg bg-surface-container hover:bg-secondary/5 border border-transparent hover:border-secondary/20 cursor-pointer transition-all duration-200" onclick="window.openCoverLetterModal('${company.name}', '${company.role}', '${q.replace(/'/g, "\\'")}')">
+                                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-secondary/10 group-hover/item:bg-secondary text-secondary group-hover/item:text-white text-xs font-bold shrink-0 transition-colors">${idx+1}</span>
+                                    <span class="text-xs font-medium text-on-surface-variant group-hover/item:text-on-surface leading-tight transition-colors">${q}</span>
+                                </li>
+                            `;
+                        });
+
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 class="text-xl font-extrabold text-on-surface">${company.name}</h4>
+                                    <span class="text-xs font-semibold text-secondary-container bg-secondary/10 px-2 py-0.5 rounded">${company.role}</span>
+                                </div>
+                                <div class="flex flex-col items-end">
+                                    <span class="text-2xl font-black text-secondary">${company.match_rate}%</span>
+                                    <span class="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">매칭률</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-on-surface-variant leading-relaxed mb-6 flex-grow border-b border-outline-variant pb-4">
+                                ${company.reason}
+                            </p>
+                            <div class="space-y-3">
+                                <span class="text-xs font-bold text-on-surface block flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-base">psychology_alt</span> 추천 자소서 항목 (클릭 시 생성)
+                                </span>
+                                <ul class="space-y-2">
+                                    ${questionsHtml}
+                                </ul>
+                            </div>
+                        `;
+                        recommendedCompaniesGrid.appendChild(card);
+                    });
+                }
+            })
+            .catch(err => {
+                statusLoading.classList.add('hidden');
+                statusInitial.classList.remove('hidden');
+                showToast(err.message || "스펙 분석 도중 에러가 발생했습니다.", true);
+            });
+        });
+
+        // 2. 자소서 모달 창 열기 함수 전역 설정
+        window.openCoverLetterModal = function(companyName, roleName, question) {
+            selectedCompany = companyName;
+            selectedRole = roleName;
+            
+            modalCompanyName.textContent = companyName;
+            modalRoleName.textContent = roleName;
+            modalQuestionInput.value = question;
+            
+            // 모달 초기 상태
+            modalGenerationLoading.classList.add('hidden');
+            modalEditorArea.classList.add('hidden');
+            btnSaveDraft.classList.add('hidden');
+            btnGenerateDraft.classList.remove('hidden');
+            
+            // 모달 노출
+            modal.classList.remove('hidden');
+        };
+
+        // 모달 닫기
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+        btnCloseModal.addEventListener('click', closeModal);
+        btnCloseModalCancel.addEventListener('click', closeModal);
+
+        // 글자 수 카운팅
+        modalContentEditor.addEventListener('input', function() {
+            charCounter.textContent = `${modalContentEditor.value.length} 자`;
+        });
+
+        // 3. 자소서 초안 생성하기
+        btnGenerateDraft.addEventListener('click', function() {
+            const question = modalQuestionInput.value.trim();
+            if (!question) {
+                showToast("자소서 질문을 입력 또는 선택해 주세요.", true);
+                return;
+            }
+
+            btnGenerateDraft.classList.add('hidden');
+            modalGenerationLoading.classList.remove('hidden');
+
+            fetch("{% url 'jobs:ai_generate_coverletter' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    company_name: selectedCompany,
+                    role: selectedRole,
+                    question: question
+                })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("자소서 생성에 실패했습니다.");
+                }
+                return res.json();
+            })
+            .then(response => {
+                modalGenerationLoading.classList.add('hidden');
+                
+                if (response.status === 'success') {
+                    modalEditorArea.classList.remove('hidden');
+                    btnSaveDraft.classList.remove('hidden');
+                    
+                    modalContentEditor.value = response.coverletter_draft;
+                    charCounter.textContent = `${response.coverletter_draft.length} 자`;
+                    showToast("자소서 초안이 완성되었습니다!");
+                }
+            })
+            .catch(err => {
+                modalGenerationLoading.classList.add('hidden');
+                btnGenerateDraft.classList.remove('hidden');
+                showToast(err.message, true);
+            });
+        });
+
+        // 4. 자소서 저장하기
+        btnSaveDraft.addEventListener('click', function() {
+            const question = modalQuestionInput.value.trim();
+            const content = modalContentEditor.value.trim();
+
+            if (!content) {
+                showToast("저장할 자소서 내용이 없습니다.", true);
+                return;
+            }
+
+            btnSaveDraft.disabled = true;
+            btnSaveDraft.textContent = "저장 중...";
+
+            fetch("{% url 'jobs:ai_save_coverletter' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    company_name: selectedCompany,
+                    role: selectedRole,
+                    title: `[${selectedCompany}] ${question}`,
+                    content: content
+                })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("자소서 저장에 실패했습니다.");
+                }
+                return res.json();
+            })
+            .then(response => {
+                btnSaveDraft.disabled = false;
+                btnSaveDraft.innerHTML = `<span class="material-symbols-outlined text-lg">save</span> 내 자소서에 저장`;
+                
+                if (response.status === 'success') {
+                    showToast(response.message);
+                    closeModal();
+                }
+            })
+            .catch(err => {
+                btnSaveDraft.disabled = false;
+                btnSaveDraft.innerHTML = `<span class="material-symbols-outlined text-lg">save</span> 내 자소서에 저장`;
+                showToast(err.message, true);
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -7,7 +7,31 @@
         
         <div class="flex justify-between items-center mb-8 border-b pb-4">
             <h1 class="text-2xl font-bold text-blue-600">내 대시보드</h1>
-            <a href="{% url 'index' %}" class="text-sm text-slate-500 hover:text-slate-700">← 메인 홈으로</a>
+            <div class="flex items-center gap-3">
+                <!-- 워크넷 동기화 버튼 추가 -->
+                <button id="sync-worknet-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition font-semibold text-sm shadow-sm flex items-center gap-1.5 active:scale-95">
+                    <span class="material-symbols-outlined text-base">sync</span>
+                    워크넷 공고 동기화
+                </button>
+                <a href="{% url 'index' %}" class="text-sm text-slate-500 hover:text-slate-700">← 메인 홈으로</a>
+            </div>
+        </div>
+
+        <!-- 동기화 에러 경고 배너 (평소엔 hidden) -->
+        <div id="sync-error-banner" class="hidden mb-6 bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-red-500 text-xl mt-0.5">error</span>
+            <div class="text-sm">
+                <span class="font-bold">동기화 실패:</span>
+                <span id="sync-error-msg">워크넷 API를 호출하는 중 오류가 발생했습니다.</span>
+            </div>
+        </div>
+
+        <!-- 동기화 로딩 배너 (평소엔 hidden) -->
+        <div id="sync-loading-banner" class="hidden mb-6 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-xl flex items-center gap-2.5">
+            <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div class="text-sm font-semibold">
+                워크넷 OpenAPI로부터 최신 구인 구직 데이터를 가져오고 있습니다. 잠시만 기다려 주세요...
+            </div>
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6">
@@ -36,4 +60,125 @@
             </div>
         </div>
     </div>
+
+    <!-- 토스트 알림창 -->
+    <div id="toast-message" class="fixed bottom-5 right-5 z-50 hidden bg-slate-800 text-white px-6 py-3.5 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300 transform translate-y-10 opacity-0">
+        <span class="material-symbols-outlined text-green-400">check_circle</span>
+        <span id="toast-text" class="text-sm font-semibold">저장되었습니다!</span>
+    </div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const syncBtn = document.getElementById('sync-worknet-btn');
+        const errorBanner = document.getElementById('sync-error-banner');
+        const errorMsg = document.getElementById('sync-error-msg');
+        const loadingBanner = document.getElementById('sync-loading-banner');
+
+        const toast = document.getElementById('toast-message');
+        const toastText = document.getElementById('toast-text');
+
+        function showToast(text, isError = false) {
+            toastText.textContent = text;
+            const icon = toast.querySelector('.material-symbols-outlined');
+            if (isError) {
+                icon.textContent = "error";
+                icon.className = "material-symbols-outlined text-red-400";
+            } else {
+                icon.textContent = "check_circle";
+                icon.className = "material-symbols-outlined text-green-400";
+            }
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+            }, 50);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3500);
+        }
+
+        // 워크넷 동기화 버튼 핸들러
+        syncBtn.addEventListener('click', function() {
+            syncBtn.disabled = true;
+            errorBanner.classList.add('hidden');
+            loadingBanner.classList.remove('hidden');
+
+            fetch("{% url 'jobs:sync_worknet_jobs' %}")
+                .then(res => {
+                    return res.json().then(data => {
+                        if (!res.ok) {
+                            throw new Error(data.message || "동기화 실패");
+                        }
+                        return data;
+                    });
+                })
+                .then(data => {
+                    loadingBanner.classList.add('hidden');
+                    syncBtn.disabled = false;
+                    showToast(data.message || "동기화 완료!");
+                })
+                .catch(err => {
+                    loadingBanner.classList.add('hidden');
+                    syncBtn.disabled = false;
+                    
+                    errorMsg.textContent = err.message;
+                    errorBanner.classList.remove('hidden');
+                    showToast("동기화 오류가 발생했습니다.", true);
+                });
+        });
+
+        // 추천 공고 로드 및 매칭
+        const loadBtn = document.getElementById('load-jobs-btn');
+        const container = document.getElementById('job-list-container');
+
+        loadBtn.addEventListener('click', function() {
+            container.innerHTML = `
+                <div class="flex justify-center items-center py-8">
+                    <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                </div>
+            `;
+            fetch("{% url 'jobs:recommended_jobs' %}")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'info') {
+                        container.innerHTML = `<p class="text-amber-600 text-center py-8 font-medium">${data.message}</p>`;
+                        return;
+                    }
+                    
+                    const jobs = data.jobs || data;
+                    if (!jobs || jobs.length === 0) {
+                        container.innerHTML = `<p class="text-slate-400 text-center py-8">매칭 결과 조건에 부합하는 공고가 없습니다.</p>`;
+                        return;
+                    }
+
+                    let html = "";
+                    jobs.forEach(job => {
+                        html += `
+                            <div class="border border-slate-100 hover:border-blue-100 hover:bg-slate-50/50 p-5 rounded-xl transition shadow-sm bg-white flex justify-between items-center">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-bold text-slate-800 text-base">${job.company_name}</span>
+                                        <span class="bg-blue-50 text-blue-600 text-[10px] font-extrabold px-2 py-0.5 rounded border border-blue-100">매칭률 ${job.match_rate}%</span>
+                                    </div>
+                                    <h4 class="text-sm font-semibold text-slate-600 mb-2">${job.title}</h4>
+                                    <div class="flex gap-1.5 flex-wrap">
+                                        ${job.skills.map(s => `<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">${s}</span>`).join('')}
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+                            </div>
+                        `;
+                    });
+                    container.innerHTML = html;
+                })
+                .catch(err => {
+                    container.innerHTML = `<p class="text-red-500 text-center py-8 font-medium">추천 정보를 불러오는 도중 오류가 발생했습니다.</p>`;
+                });
+        });
+    });
+</script>
 {% endblock %}

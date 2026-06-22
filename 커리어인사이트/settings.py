@@ -171,11 +171,6 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 # Social account providers
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'APP': {
-            'client_id': os.environ.get('GOOGLE_CLIENT_ID', ''),
-            'secret': os.environ.get('GOOGLE_CLIENT_SECRET', ''),
-            'key': ''
-        },
         'SCOPE': [
             'profile',
             'email',
@@ -184,18 +179,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'access_type': 'offline',
         }
     },
-    'kakao': {
-        'APP': {
-            'client_id': '4508f1c7b924acb8b6749048aad8bdd1',
-        }
-    },
-    'naver': {
-        'APP': {
-            'client_id': 'PIs_49ioX2LT1DMF7E6p',
-            'secret': '4GkOXsa3M1',
-            'key': ''
-        }
-    }
+    'kakao': {},
+    'naver': {}
 }
 
 

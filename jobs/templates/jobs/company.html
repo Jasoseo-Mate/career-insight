@@ -20,9 +20,9 @@
                 
                 <div class="hidden md:flex gap-6 items-center h-full">
                     <a class="text-white/80 hover:text-white transition-colors font-medium" href="{% url 'index' %}">홈</a>
-                    <a class="border-b-4 border-[#0058be] text-white font-bold pb-1" href="{% url 'company_analysis' %}">기업 분석</a>
-                    <a class="text-white/80 hover:text-white transition-colors font-medium" href="{% url 'dashboard' %}">직무 매칭</a>
-                    <a class="text-white/80 hover:text-white transition-colors font-medium" href="{% url 'my_spec' %}">내 스펙</a>
+                    <a class="border-b-4 border-[#0058be] text-white font-bold pb-1" href="{% url 'jobs:company_analysis' %}">기업 분석</a>
+                    <a class="text-white/80 hover:text-white transition-colors font-medium" href="{% url 'jobs:ai_matching' %}">AI 매칭 & 자소서</a>
+                    <a class="text-white/80 hover:text-white transition-colors font-medium" href="{% url 'jobs:my_spec' %}">내 스펙</a>
                 </div>
             </div>
             <div class="flex items-center gap-4">
@@ -45,7 +45,7 @@
                 이 페이지는 곧 업데이트될 예정입니다.
             </p>
             <div class="flex justify-center gap-4">
-                <a href="{% url 'dashboard' %}" class="px-6 py-3 bg-[#0058be] text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-sm">
+                <a href="{% url 'jobs:dashboard' %}" class="px-6 py-3 bg-[#0058be] text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-sm">
                     내 대시보드로 가기
                 </a>
                 <a href="{% url 'index' %}" class="px-6 py-3 border border-slate-300 text-slate-600 rounded-lg font-bold hover:bg-slate-50 transition-colors">

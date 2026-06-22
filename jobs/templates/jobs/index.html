@@ -61,9 +61,9 @@
             
             <div class="hidden md:flex gap-gutter items-center h-full">
                 <a class="border-b-4 border-secondary text-on-primary font-bold pb-1 font-body-md text-body-md" href="{% url 'index' %}">홈</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'company_analysis' %}">기업 분석</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'dashboard' %}">직무 매칭</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'my_spec' %}">내 스펙</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'jobs:company_analysis' %}">기업 분석</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'jobs:ai_matching' %}">AI 매칭 & 자소서</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'jobs:my_spec' %}">내 스펙</a>
             </div>
             </div>
         <div class="flex items-center gap-stack-md">
@@ -90,7 +90,7 @@
                     인공지능이 분석한 5,000개 이상의 기업 데이터와 당신의 커리어 패스를 정밀 매칭합니다. 정체된 성장이 아닌, 도약을 위한 데이터 기반 커리어 솔루션을 경험하세요.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-stack-md">
-                    <a href="{% url 'dashboard' %}" class="px-8 py-4 bg-secondary text-on-secondary rounded-lg font-bold hover:bg-secondary-container transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <a href="{% url 'jobs:dashboard' %}" class="px-8 py-4 bg-secondary text-on-secondary rounded-lg font-bold hover:bg-secondary-container transition-all active:scale-95 flex items-center justify-center gap-2">
                         지금 시작하기
                         <span class="material-symbols-outlined">trending_flat</span>
                     </a>

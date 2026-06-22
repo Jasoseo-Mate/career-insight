@@ -1,4 +1,5 @@
 # jobs/views.py
+import os
 from django.http import JsonResponse
 from .models import JobPost
 from django.shortcuts import render
@@ -79,26 +80,24 @@ def recommended_jobs(request):
     for job in all_jobs:
         job_skills = set(job.required_skills.values_list('name', flat=True))
         
-        if not job_skills:
-            continue
-            
-        intersection = user_skills.intersection(job_skills)
-        union = user_skills.union(job_skills)
+        if not job_skills or not user_skills:
+            match_rate = 0
+        else:
+            intersection = user_skills.intersection(job_skills)
+            union = user_skills.union(job_skills)
+            match_rate = int((len(intersection) / len(union)) * 100)
         
-        match_rate = int((len(intersection) / len(union)) * 100)
-        
-        if match_rate >= 50:
-            recommendations.append({
-                'id': job.id,
-                'company_name': job.company_name,
-                'title': job.title,
-                'match_rate': match_rate,
-                'skills': list(job_skills)
-            })
+        recommendations.append({
+            'id': job.id,
+            'company_name': job.company_name,
+            'title': job.title,
+            'match_rate': match_rate,
+            'skills': list(job_skills) if job_skills else ['공통']
+        })
             
     recommendations.sort(key=lambda x: x['match_rate'], reverse=True)
     
-    return JsonResponse({'jobs': recommendations}, safe=False, json_dumps_params={'ensure_ascii': False})
+    return JsonResponse({'jobs': recommendations[:10]}, safe=False, json_dumps_params={'ensure_ascii': False})
 
 
 # jobs/views.py 파일 하단에 추가
@@ -126,3 +125,345 @@ def my_spec(request):
         'experiences': experiences
     }
     return render(request, 'jobs/myspec.html', context)
+
+
+# 🌟 AI 기반 매칭 및 자소서 메이트 핵심 뷰 구현
+import json
+import requests
+from django.views.decorators.http import require_POST
+from resumes.models import CoverLetter
+
+@login_required
+def ai_matching(request):
+    """
+    AI 매칭 및 자소서 메이트 전용 랜딩 페이지를 렌더링합니다.
+    """
+    return render(request, 'jobs/ai_matching.html')
+
+
+@login_required
+@require_POST
+def ai_analyze_spec(request):
+    """
+    사용자의 전체 스펙 정보를 수집하여 SSAFY GMS API (gpt-5.4-nano)를 통해 분석 및 최적 기업을 추천받습니다.
+    """
+    user = request.user
+    gmskey = os.environ.get('GMSKEY') or settings.GMSKEY if hasattr(settings, 'GMSKEY') else os.environ.get('GMSKEY')
+    
+    if not gmskey:
+        # API 키가 없으면 친절한 경고 반환
+        return JsonResponse({
+            'status': 'error',
+            'message': '.env 파일에 GMSKEY가 등록되어 있지 않습니다. 키를 등록한 뒤 시도해 주세요.'
+        }, status=400, json_dumps_params={'ensure_ascii': False})
+
+    # 1. 사용자의 DB 데이터 수집 및 문자열 화
+    profile_bio = ""
+    skills_list = []
+    try:
+        profile = user.profile
+        profile_bio = profile.bio
+        skills_list = list(profile.skills.values_list('name', flat=True))
+    except Profile.DoesNotExist:
+        pass
+
+    educations = user.educations.all()
+    edu_text = "\n".join([f"- {e.school_name} {e.major} ({e.degree}, {e.start_date}~{e.end_date or '재학중'})" for e in educations])
+    
+    certificates = user.certificates.all()
+    cert_text = "\n".join([f"- {c.name} (발급기관: {c.issuer}, 취득일: {c.date_acquired})" for c in certificates])
+    
+    activities = user.activities.all()
+    act_text = "\n".join([f"- {a.title}: {a.description} ({a.start_date}~{a.end_date or '진행중'})" for a in activities])
+    
+    projects = user.projects.all()
+    proj_text = "\n".join([f"- {p.title}: {p.description} (URL: {p.url or '없음'})" for p in projects])
+    
+    experiences = user.experiences.all()
+    exp_text = "\n".join([f"- {ex.title} at {ex.company}: {ex.description} ({ex.start_date}~{ex.end_date or '진행중'})" for ex in experiences])
+
+    # 2. GMS 프롬프트 구성
+    spec_summary = f"""
+    [구직자 스펙 정보 요약]
+    - 보유 기술 스택: {', '.join(skills_list) if skills_list else '없음'}
+    - 한 줄 자기소개: {profile_bio or '없음'}
+    
+    - 학력 사항:
+    {edu_text if edu_text else '없음'}
+    
+    - 자격증:
+    {cert_text if cert_text else '없음'}
+    
+    - 대외활동:
+    {act_text if act_text else '없음'}
+    
+    - 프로젝트 경험:
+    {proj_text if proj_text else '없음'}
+    
+    - 경력 및 경험:
+    {exp_text if exp_text else '없음'}
+    """
+
+    prompt = f"""
+    당신은 IT/소프트웨어 구직자들을 위한 최고의 커리어 컨설턴트 AI입니다.
+    아래 구직자의 인적 사항 및 스펙 요약을 바탕으로 프로페셔널한 맞춤 기업 분석 및 매칭을 해 주십시오.
+    
+    {spec_summary}
+    
+    다음 2가지 미션을 완벽히 수행해 주세요.
+    1. 이 구직자의 전체적인 강점과 장점을 한글 2-3줄 요약평으로 제공하십시오.
+    2. 구직자의 주 무기(기술, 프로젝트, 대외활동 등)를 저격할 수 있는 대표적인 한국 내 IT 기업(예: 당근, 토스, 카카오, 우아한형제들, 무신사 등 실존 기업 위주) 3곳을 매칭해 추천해 주십시오.
+       각 기업별로 다음 구조를 파싱할 수 있게 제공해야 합니다:
+       - 기업명 (name)
+       - 추천하는 적합 직무 (role, 예: 'React 프론트엔드 개발자')
+       - 추천 상세 이유 (reason, 사용자의 스펙 요소를 구체적으로 거론하며 논리적으로 설명)
+       - 추천 매칭율 (match_rate, 50~99 사이의 정수)
+       - 해당 기업 지원 시 자기소개서에 쓰기 가장 좋은 킬러 문항 2가지 (recommended_questions, 예: '삼성전자의 AI 서비스에 기여하고 싶은 이유', '대용량 트래픽 동시성 처리를 해결한 도전 경험')
+    
+    [응답 조건]
+    - 반드시 마크다운 블록(```json) 없이 오직 원시 JSON 데이터만을 반환해야 합니다.
+    - JSON의 Key 구조는 정확히 아래의 형식을 만족해 주십시오:
+    {{
+      "overall_analysis": "전반적인 강점 분석 요약 내용...",
+      "recommended_companies": [
+        {{
+          "name": "기업명",
+          "role": "추천 직무",
+          "reason": "구체적인 매칭 사유...",
+          "match_rate": 88,
+          "recommended_questions": ["추천 자소서 질문 문항 1", "추천 자소서 질문 문항 2"]
+        }}
+      ]
+    }}
+    """
+
+    # 3. GMS API 호출 (OpenAI Chat Completion 스펙)
+    url = "https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {gmskey}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "gpt-5.4-nano",
+        "messages": [
+            {
+                "role": "system",
+                "content": "당신은 IT/소프트웨어 구직자들을 위한 최고의 커리어 컨설턴트 AI입니다. 반드시 요구하는 형태의 JSON 포맷으로만 응답해야 합니다. 마크다운 기호(예: ```json 등)는 절대 포함하지 마십시오."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        "response_format": { "type": "json_object" }
+    }
+    
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=20)
+        response.raise_for_status()
+        res_json = response.json()
+        
+        # GMS / OpenAI 결과 텍스트 파싱
+        candidate_text = res_json['choices'][0]['message']['content']
+        parsed_data = json.loads(candidate_text.strip())
+        
+        return JsonResponse({
+            'status': 'success',
+            'data': parsed_data
+        }, json_dumps_params={'ensure_ascii': False})
+        
+    except Exception as e:
+        # 혹시 response_format에 대한 에러가 날 수 있으므로 상세 에러 반환
+        return JsonResponse({
+            'status': 'error',
+            'message': f'GMS API 분석 요청 중 오류가 발생했습니다: {str(e)}'
+        }, status=500, json_dumps_params={'ensure_ascii': False})
+
+
+@login_required
+@require_POST
+def ai_generate_coverletter(request):
+    """
+    선택된 기업, 직무, 질문 문항과 구직자의 스펙을 조합하여 SSAFY GMS API (gpt-5.4-nano)로 완성도 높은 자소서 초안을 만듭니다.
+    """
+    user = request.user
+    gmskey = os.environ.get('GMSKEY') or settings.GMSKEY if hasattr(settings, 'GMSKEY') else os.environ.get('GMSKEY')
+    
+    if not gmskey:
+        return JsonResponse({'status': 'error', 'message': 'GMSKEY 설정이 없습니다.'}, status=400)
+        
+    try:
+        body = json.loads(request.body)
+        company_name = body.get('company_name')
+        role = body.get('role')
+        question = body.get('question')
+    except Exception:
+        company_name = request.POST.get('company_name')
+        role = request.POST.get('role')
+        question = request.POST.get('question')
+
+    if not all([company_name, role, question]):
+        return JsonResponse({'status': 'error', 'message': '기업명, 직무, 질문 문항은 필수 입력 항목입니다.'}, status=400)
+
+    # 사용자의 스펙 요약 수집
+    profile_bio = ""
+    skills_list = []
+    try:
+        profile = user.profile
+        profile_bio = profile.bio
+        skills_list = list(profile.skills.values_list('name', flat=True))
+    except Profile.DoesNotExist:
+        pass
+
+    educations = user.educations.all()
+    edu_text = "\n".join([f"- {e.school_name} {e.major} ({e.degree})" for e in educations])
+    certificates = user.certificates.all()
+    cert_text = "\n".join([f"- {c.name}" for c in certificates])
+    projects = user.projects.all()
+    proj_text = "\n".join([f"- {p.title}: {p.description}" for p in projects])
+    experiences = user.experiences.all()
+    exp_text = "\n".join([f"- {ex.title} at {ex.company}: {ex.description}" for ex in experiences])
+
+    prompt = f"""
+    당신은 취업 준비생의 자소서를 전문적으로 첨삭하고 완성해주는 글쓰기 마스터 AI입니다.
+    다음 구직자의 정보와 지원하려는 기업 및 문항 정보를 확인한 뒤, 논리 정연하고 설득력 있는 자기소개서 초안을 작성해 주십시오.
+    
+    [지원 목표]
+    - 기업명: {company_name}
+    - 희망 직무: {role}
+    - 작성할 자소서 질문 문항: "{question}"
+    
+    [지원자 스펙 요약]
+    - 보유 스킬: {', '.join(skills_list)}
+    - 자기소개: {profile_bio}
+    - 학력: {edu_text}
+    - 자격증: {cert_text}
+    - 프로젝트: {proj_text}
+    - 경력/경험: {exp_text}
+    
+    [작성 가이드라인]
+    - 분량은 한글 기준 800자 내외로 완성도 높게 적어주세요.
+    - 소제목을 달아 한눈에 구조가 들어오게 작성해 주십시오.
+    - 구직자의 프로젝트나 기술 스택(예: Django, React, 쿠폰 발급 동시성 제어 등 구직자 스펙에 실제 명시된 항목)을 자소서 내용에 자연스럽게 녹여내어 전문성을 증명해야 합니다.
+    - 지원하려는 기업({company_name})과 직무({role})에 부합하는 열정과 논리를 구성해 주십시오.
+    - 서론-본론-결론의 구조를 명확히 지키고, 문체가 자연스럽고 신뢰감을 주도록 정중한 경어체(~습니다)로 적어주십시오.
+    """
+
+    url = "https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {gmskey}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "gpt-5.4-nano",
+        "messages": [
+            {
+                "role": "system",
+                "content": "당신은 취업 준비생의 자소서를 전문적으로 첨삭하고 완성해주는 글쓰기 마스터 AI입니다."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=20)
+        response.raise_for_status()
+        res_json = response.json()
+        
+        result_content = res_json['choices'][0]['message']['content']
+        return JsonResponse({
+            'status': 'success',
+            'coverletter_draft': result_content
+        }, json_dumps_params={'ensure_ascii': False})
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'자기소개서 초안 작성 중 오류가 발생했습니다: {str(e)}'
+        }, status=500, json_dumps_params={'ensure_ascii': False})
+
+
+@login_required
+@require_POST
+def ai_save_coverletter(request):
+    """
+    AI로 생성하고 다듬은 자기소개서를 DB (CoverLetter 모델)에 성공적으로 저장합니다.
+    """
+    try:
+        body = json.loads(request.body)
+        company_name = body.get('company_name')
+        role = body.get('role')
+        title = body.get('title')
+        content = body.get('content')
+    except Exception:
+        company_name = request.POST.get('company_name')
+        role = request.POST.get('role')
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+
+    if not all([company_name, role, title, content]):
+        return JsonResponse({'status': 'error', 'message': '모든 필드를 정확하게 입력해 주세요.'}, status=400)
+
+    # 1. JobPost FK 매핑 해결을 위한 가상 JobPost 조회 또는 생성
+    # CoverLetter 모델의 job_post 필수 제약조건을 우아하게 우회
+    job_post, _ = JobPost.objects.get_or_create(
+        company_name=company_name,
+        title=role,
+        defaults={
+            'description': f"AI 매칭을 통해 가상으로 생성된 {company_name}의 {role} 채용 공고입니다."
+        }
+    )
+
+    # 2. CoverLetter 생성 및 저장
+    try:
+        cover_letter = CoverLetter.objects.create(
+            user=request.user,
+            job_post=job_post,
+            title=title,
+            content=content
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': f'{company_name} - {role} 자기소개서가 성공적으로 저장되었습니다!',
+            'id': cover_letter.id
+        }, json_dumps_params={'ensure_ascii': False})
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'자기소개서 저장 중 오류가 발생했습니다: {str(e)}'
+        }, status=500, json_dumps_params={'ensure_ascii': False})
+
+
+@login_required
+def sync_worknet_jobs(request):
+    """
+    관리자 또는 사용자의 요청에 의해 워크넷 공고 데이터를 데이터베이스와 싱크합니다.
+    """
+    api_key = os.environ.get('WORKNET_API_KEY')
+    if not api_key:
+        return JsonResponse({
+            'status': 'error',
+            'message': '서버에 WORKNET_API_KEY 설정이 정의되어 있지 않습니다. .env를 확인해 주세요.'
+        }, status=400, json_dumps_params={'ensure_ascii': False})
+
+    try:
+        from django.core.management import call_command
+        # call_command를 사용해 fetch_worknet_jobs 커맨드 실행
+        call_command('fetch_worknet_jobs')
+        
+        current_count = JobPost.objects.count()
+        return JsonResponse({
+            'status': 'success',
+            'message': '성공적으로 워크넷 채용 공고가 최신 상태로 동기화되었습니다!',
+            'current_total': current_count
+        }, json_dumps_params={'ensure_ascii': False})
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'동기화 작업 수행 중 오류가 발생했습니다: {str(e)}'
+        }, status=500, json_dumps_params={'ensure_ascii': False})

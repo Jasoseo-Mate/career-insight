@@ -52,9 +52,9 @@
             <a class="font-headline-md text-headline-md font-bold text-on-primary" href="{% url 'index' %}">자소서 메이트</a>
             <div class="hidden md:flex gap-gutter items-center h-full">
                 <a class="text-on-primary font-bold pb-1 font-body-md text-body-md" href="{% url 'index' %}">홈</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">기업 분석</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">직무 매칭</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="#">내 스펙</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'jobs:company_analysis' %}">기업 분석</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'jobs:ai_matching' %}">AI 매칭 & 자소서</a>
+                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'jobs:my_spec' %}">내 스펙</a>
             </div>
         </div>
         
