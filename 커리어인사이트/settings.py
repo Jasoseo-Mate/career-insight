@@ -15,6 +15,17 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env manually if exists
+import os
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    with open(env_file, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                key, val = line.split('=', 1)
+                os.environ[key.strip()] = val.strip()
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -40,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
     # allauth
     'allauth',
@@ -154,13 +166,14 @@ ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_PASSWORD_MIN_LENGTH = 8
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Social account providers
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': 'YOUR_GOOGLE_CLIENT_ID',
-            'secret': 'YOUR_GOOGLE_SECRET',
+            'client_id': os.environ.get('GOOGLE_CLIENT_ID', ''),
+            'secret': os.environ.get('GOOGLE_CLIENT_SECRET', ''),
             'key': ''
         },
         'SCOPE': [
@@ -173,15 +186,13 @@ SOCIALACCOUNT_PROVIDERS = {
     },
     'kakao': {
         'APP': {
-            'client_id': 'YOUR_KAKAO_CLIENT_ID',
-            'secret': 'YOUR_KAKAO_SECRET', # Kakao doesn't always use a secret, but good to include if it's there
-            'key': ''
+            'client_id': '4508f1c7b924acb8b6749048aad8bdd1',
         }
     },
     'naver': {
         'APP': {
-            'client_id': 'YOUR_NAVER_CLIENT_ID',
-            'secret': 'YOUR_NAVER_SECRET',
+            'client_id': 'PIs_49ioX2LT1DMF7E6p',
+            'secret': '4GkOXsa3M1',
             'key': ''
         }
     }
