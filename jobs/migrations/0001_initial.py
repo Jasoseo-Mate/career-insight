@@ -15,30 +15,67 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Skill',
+            name="Skill",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50, unique=True)),
             ],
         ),
         migrations.CreateModel(
-            name='UserSpec',
+            name="UserSpec",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('education', models.CharField(max_length=100)),
-                ('language_score', models.IntegerField(default=0)),
-                ('skills', models.ManyToManyField(related_name='users', to='jobs.skill')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='spec', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("education", models.CharField(max_length=100)),
+                ("language_score", models.IntegerField(default=0)),
+                (
+                    "skills",
+                    models.ManyToManyField(related_name="users", to="jobs.skill"),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="spec",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='JobPost',
+            name="JobPost",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('company_name', models.CharField(max_length=100)),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField()),
-                ('required_skills', models.ManyToManyField(related_name='jobs', to='jobs.skill')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("company_name", models.CharField(max_length=100)),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField()),
+                (
+                    "required_skills",
+                    models.ManyToManyField(related_name="jobs", to="jobs.skill"),
+                ),
             ],
         ),
     ]

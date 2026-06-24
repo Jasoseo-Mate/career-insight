@@ -3,69 +3,97 @@
 {% block title %}마이 대시보드 - 자소서 메이트{% endblock %}
 
 {% block content %}
-    <div class="max-w-4xl mx-auto p-6">
-        
-        <div class="flex justify-between items-center mb-8 border-b pb-4">
-            <h1 class="text-2xl font-bold text-blue-600">내 대시보드</h1>
-            <div class="flex items-center gap-3">
-                <!-- 워크넷 동기화 버튼 추가 -->
-                <button id="sync-worknet-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition font-semibold text-sm shadow-sm flex items-center gap-1.5 active:scale-95">
-                    <span class="material-symbols-outlined text-base">sync</span>
-                    워크넷 공고 동기화
-                </button>
-                <a href="{% url 'index' %}" class="text-sm text-slate-500 hover:text-slate-700">← 메인 홈으로</a>
+<div class="max-w-5xl mx-auto px-6 py-10">
+    
+    <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-10 gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-800 mb-2">마이 대시보드</h1>
+            <p class="text-slate-500 font-medium">나에게 딱 맞는 채용 공고를 찾고 자소서를 작성해보세요.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="sync-worknet-btn" class="bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-xl transition-all font-bold text-sm shadow-sm flex items-center gap-2 active:scale-95">
+                <span class="material-symbols-outlined text-lg text-slate-400">sync</span>
+                고용24 채용정보 동기화
+            </button>
+        </div>
+    </div>
+
+    <!-- 동기화 에러 경고 배너 -->
+    <div id="sync-error-banner" class="hidden mb-8 bg-red-50 border border-red-200 text-red-800 p-5 rounded-2xl flex items-start gap-3">
+        <span class="material-symbols-outlined text-red-500 text-2xl mt-0.5">error</span>
+        <div>
+            <span class="font-bold text-base block mb-1">동기화 실패</span>
+            <span id="sync-error-msg" class="text-sm font-medium text-red-700">워크넷 API를 호출하는 중 오류가 발생했습니다.</span>
+        </div>
+    </div>
+
+    <!-- 동기화 로딩 배너 -->
+    <div id="sync-loading-banner" class="hidden mb-8 bg-blue-50 border border-blue-200 text-blue-800 p-5 rounded-2xl flex items-center gap-4">
+        <div class="w-6 h-6 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <div class="text-sm font-bold text-blue-700">
+            고용24 OpenAPI로부터 최신 구인 구직 데이터를 가져오고 있습니다. 잠시만 기다려 주세요...
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="md:col-span-1 bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-3xl shadow-md text-white relative overflow-hidden">
+            <div class="absolute right-0 top-0 opacity-10 text-9xl -mt-4 -mr-4 pointer-events-none">👋</div>
+            <h2 class="text-xl font-extrabold mb-4 relative z-10">안녕하세요, {{ user.username }}님!</h2>
+            <div class="space-y-4 relative z-10">
+                <div>
+                    <p class="text-slate-400 text-xs font-bold mb-1.5 uppercase tracking-wider">나의 핵심 스킬</p>
+                    <div class="flex flex-wrap gap-1.5">
+                        {% if user_skills %}
+                            {% for skill_name in user_skills|slice:":5" %}
+                                <span class="bg-white/20 text-white px-2 py-1 rounded-md text-xs font-bold backdrop-blur-sm">{{ skill_name }}</span>
+                            {% endfor %}
+                            {% if user_skills|length > 5 %}
+                                <span class="bg-white/10 text-white px-2 py-1 rounded-md text-xs font-bold">+{{ user_skills|length|add:"-5" }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-xs text-slate-300">등록된 스킬 없음</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-xs font-bold mb-1.5 uppercase tracking-wider">희망 기업 규모</p>
+                    {% if profile and profile.preferred_company_size %}
+                        <span class="text-sm font-bold text-white">{{ profile.preferred_company_size }}</span>
+                    {% else %}
+                        <span class="text-xs text-slate-300">미지정</span>
+                    {% endif %}
+                </div>
             </div>
+            <a href="{% url 'accounts:profile_dashboard' %}" class="inline-block mt-6 text-xs font-bold text-blue-300 hover:text-white transition-colors relative z-10">프로필 수정하기 →</a>
         </div>
 
-        <!-- 동기화 에러 경고 배너 (평소엔 hidden) -->
-        <div id="sync-error-banner" class="hidden mb-6 bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex items-start gap-2.5">
-            <span class="material-symbols-outlined text-red-500 text-xl mt-0.5">error</span>
-            <div class="text-sm">
-                <span class="font-bold">동기화 실패:</span>
-                <span id="sync-error-msg">워크넷 API를 호출하는 중 오류가 발생했습니다.</span>
-            </div>
-        </div>
-
-        <!-- 동기화 로딩 배너 (평소엔 hidden) -->
-        <div id="sync-loading-banner" class="hidden mb-6 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-xl flex items-center gap-2.5">
-            <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            <div class="text-sm font-semibold">
-                워크넷 OpenAPI로부터 최신 구인 구직 데이터를 가져오고 있습니다. 잠시만 기다려 주세요...
-            </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6">
-            <h2 class="text-xl font-bold mb-2">안녕하세요! 👋</h2>
-            <p class="text-slate-600">현재 탐색 중인 스킬셋: 
-                {% if user_skills %}
-                    {% for skill_name in user_skills %}
-                        <span class="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-md text-xs font-bold ml-1">{{ skill_name }}</span>
-                    {% endfor %}
-                {% else %}
-                    <span class="text-sm text-slate-500">등록된 스킬이 없습니다. <a href="{% url 'accounts:profile_dashboard' %}" class="text-blue-600 hover:underline">프로필에서 스킬을 추가해주세요.</a></span>
-                {% endif %}
-            </p>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+        <div class="md:col-span-2 bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-slate-900">🎯 AI 추천 맞춤 채용 공고</h3>
-                <button id="load-jobs-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold text-sm shadow-sm">
-                    추천 공고 매칭하기
+                <div class="flex items-center gap-2">
+                    <span class="p-2 bg-blue-100 text-blue-600 rounded-xl text-lg">🎯</span>
+                    <h3 class="text-xl font-extrabold text-slate-800">AI 추천 맞춤 채용 공고</h3>
+                </div>
+                <button id="load-jobs-btn" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-all font-bold text-sm shadow-sm hover:shadow-md active:scale-95">
+                    공고 매칭하기
                 </button>
             </div>
 
             <div id="job-list-container" class="space-y-4">
-                <p class="text-slate-400 text-center py-8">오른쪽 위의 '추천 공고 매칭하기' 버튼을 누르면 매칭이 시작됩니다.</p>
+                <div class="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    <div class="text-4xl mb-3">🔍</div>
+                    <p class="text-slate-500 font-bold mb-1">나에게 딱 맞는 회사를 찾아볼까요?</p>
+                    <p class="text-sm text-slate-400 font-medium">우측 상단의 '공고 매칭하기' 버튼을 눌러주세요.</p>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- 토스트 알림창 -->
-    <div id="toast-message" class="fixed bottom-5 right-5 z-50 hidden bg-slate-800 text-white px-6 py-3.5 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300 transform translate-y-10 opacity-0">
-        <span class="material-symbols-outlined text-green-400">check_circle</span>
-        <span id="toast-text" class="text-sm font-semibold">저장되었습니다!</span>
-    </div>
+<!-- 토스트 알림창 -->
+<div id="toast-message" class="fixed bottom-8 right-8 z-50 hidden bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-10 opacity-0">
+    <span class="material-symbols-outlined text-green-400 text-2xl">check_circle</span>
+    <span id="toast-text" class="text-sm font-bold">저장되었습니다!</span>
+</div>
 {% endblock %}
 
 {% block extra_script %}
@@ -84,10 +112,10 @@
             const icon = toast.querySelector('.material-symbols-outlined');
             if (isError) {
                 icon.textContent = "error";
-                icon.className = "material-symbols-outlined text-red-400";
+                icon.className = "material-symbols-outlined text-red-400 text-2xl";
             } else {
                 icon.textContent = "check_circle";
-                icon.className = "material-symbols-outlined text-green-400";
+                icon.className = "material-symbols-outlined text-green-400 text-2xl";
             }
             toast.classList.remove('hidden');
             setTimeout(() => {
@@ -110,9 +138,7 @@
             fetch("{% url 'jobs:sync_worknet_jobs' %}")
                 .then(res => {
                     return res.json().then(data => {
-                        if (!res.ok) {
-                            throw new Error(data.message || "동기화 실패");
-                        }
+                        if (!res.ok) throw new Error(data.message || "동기화 실패");
                         return data;
                     });
                 })
@@ -124,7 +150,6 @@
                 .catch(err => {
                     loadingBanner.classList.add('hidden');
                     syncBtn.disabled = false;
-                    
                     errorMsg.textContent = err.message;
                     errorBanner.classList.remove('hidden');
                     showToast("동기화 오류가 발생했습니다.", true);
@@ -137,46 +162,51 @@
 
         loadBtn.addEventListener('click', function() {
             container.innerHTML = `
-                <div class="flex justify-center items-center py-8">
-                    <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <div class="flex justify-center items-center py-16">
+                    <div class="w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
                 </div>
             `;
             fetch("{% url 'jobs:recommended_jobs' %}")
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === 'info') {
-                        container.innerHTML = `<p class="text-amber-600 text-center py-8 font-medium">${data.message}</p>`;
+                        container.innerHTML = `<div class="text-center py-12 bg-orange-50 rounded-2xl border border-orange-100"><p class="text-orange-600 font-bold">${data.message}</p></div>`;
                         return;
                     }
                     
                     const jobs = data.jobs || data;
                     if (!jobs || jobs.length === 0) {
-                        container.innerHTML = `<p class="text-slate-400 text-center py-8">매칭 결과 조건에 부합하는 공고가 없습니다.</p>`;
+                        container.innerHTML = `<div class="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200"><p class="text-slate-500 font-bold">조건에 부합하는 공고가 없습니다.</p></div>`;
                         return;
                     }
 
                     let html = "";
                     jobs.forEach(job => {
                         html += `
-                            <div class="border border-slate-100 hover:border-blue-100 hover:bg-slate-50/50 p-5 rounded-xl transition shadow-sm bg-white flex justify-between items-center">
+                            <div class="group border border-slate-200 hover:border-blue-400 p-5 rounded-2xl transition-all shadow-sm bg-white flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                                 <div>
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="font-bold text-slate-800 text-base">${job.company_name}</span>
-                                        <span class="bg-blue-50 text-blue-600 text-[10px] font-extrabold px-2 py-0.5 rounded border border-blue-100">매칭률 ${job.match_rate}%</span>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="font-extrabold text-slate-800 text-lg">${job.company_name}</span>
+                                        <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-2 py-1 rounded-md border border-indigo-100">${job.company_size || '무관'}</span>
+                                        <span class="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-md border border-blue-200">매칭률 ${job.match_rate}%</span>
                                     </div>
-                                    <h4 class="text-sm font-semibold text-slate-600 mb-2">${job.title}</h4>
+                                    <h4 class="text-sm font-bold text-slate-600 mb-3 line-clamp-1">${job.title}</h4>
                                     <div class="flex gap-1.5 flex-wrap">
-                                        ${job.skills.map(s => `<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">${s}</span>`).join('')}
+                                        ${job.skills.map(s => `<span class="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg text-[11px] font-bold">${s}</span>`).join('')}
                                     </div>
                                 </div>
-                                <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+                                <div class="shrink-0 flex justify-end">
+                                    <a href="/resumes/coverletters/create/${job.id}/" class="text-sm font-bold bg-white text-blue-600 px-4 py-2 rounded-xl border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm active:scale-95 whitespace-nowrap">
+                                        자소서 쓰기 →
+                                    </a>
+                                </div>
                             </div>
                         `;
                     });
                     container.innerHTML = html;
                 })
                 .catch(err => {
-                    container.innerHTML = `<p class="text-red-500 text-center py-8 font-medium">추천 정보를 불러오는 도중 오류가 발생했습니다.</p>`;
+                    container.innerHTML = `<div class="text-center py-12 bg-red-50 rounded-2xl border border-red-100"><p class="text-red-500 font-bold">정보를 불러오는 도중 오류가 발생했습니다.</p></div>`;
                 });
         });
     });

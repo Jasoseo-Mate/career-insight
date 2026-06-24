@@ -6,14 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0002_remove_profile_education_and_more'),
-        ('jobs', '0002_delete_userspec'),
+        ("accounts", "0002_remove_profile_education_and_more"),
+        ("jobs", "0002_delete_userspec"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='skills',
-            field=models.ManyToManyField(blank=True, related_name='profiles', to='jobs.skill'),
+            model_name="profile",
+            name="skills",
+            field=models.ManyToManyField(
+                blank=True, related_name="profiles", to="jobs.skill"
+            ),
         ),
     ]

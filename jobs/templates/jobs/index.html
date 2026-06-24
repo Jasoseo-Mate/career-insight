@@ -1,183 +1,61 @@
-<!DOCTYPE html>
-<html class="light" lang="ko">
-<head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    
-    <script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            "colors": {
-                "error": "#ba1a1a", "surface-bright": "#f8f9fb", "on-error-container": "#93000a", "tertiary-fixed-dim": "#4edea3",
-                "surface-container-high": "#e7e8ea", "surface-container-low": "#f3f4f6", "on-tertiary-container": "#27c38a",
-                "secondary-container": "#2170e4", "on-primary-container": "#90a8ff", "inverse-surface": "#2e3132",
-                "on-primary-fixed": "#00164e", "inverse-on-surface": "#f0f1f3", "on-background": "#191c1e",
-                "on-tertiary-fixed": "#002113", "secondary-fixed": "#d8e2ff", "secondary-fixed-dim": "#adc6ff",
-                "surface": "#f8f9fb", "surface-dim": "#d9dadc", "background": "#f8f9fb", "on-surface-variant": "#444651",
-                "secondary": "#0058be", "tertiary-fixed": "#6ffbbe", "on-primary-fixed-variant": "#264191",
-                "inverse-primary": "#b6c4ff", "on-secondary-container": "#fefcff", "primary": "#00236f",
-                "surface-container-lowest": "#ffffff", "tertiary": "#00311f", "primary-fixed-dim": "#b6c4ff",
-                "on-secondary-fixed": "#001a42", "outline-variant": "#c5c5d3", "surface-container": "#edeef0",
-                "outline": "#757682", "on-error": "#ffffff", "error-container": "#ffdad6", "on-primary": "#ffffff",
-                "tertiary-container": "#004a31", "on-secondary": "#ffffff", "primary-container": "#1e3a8a",
-                "surface-container-highest": "#e1e2e4", "on-secondary-fixed-variant": "#004395", "primary-fixed": "#dce1ff",
-                "surface-variant": "#e1e2e4", "surface-tint": "#4059aa", "on-tertiary": "#ffffff", "on-surface": "#191c1e", "on-tertiary-fixed-variant": "#005236"
-            },
-            "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-            "spacing": { "margin-mobile": "16px", "stack-lg": "32px", "gutter": "24px", "stack-sm": "8px", "base": "8px", "stack-md": "16px", "margin-desktop": "40px", "container-max": "1280px" },
-            "fontFamily": { "body-sm": ["Inter"], "headline-lg": ["Inter"], "display": ["Inter"], "headline-md": ["Inter"], "body-lg": ["Inter"], "label-md": ["Inter"], "body-md": ["Inter"], "title-lg": ["Inter"], "headline-lg-mobile": ["Inter"] },
-            "fontSize": {
-                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
-                "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
-                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
-                "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
-                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
-                "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        body { background-color: #f8f9fb; color: #191c1e; }
-        .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
-    </style>
-</head>
-<body class="font-body-md text-body-md">
+{% extends 'base.html' %}
 
-<header class="bg-primary fixed top-0 w-full z-50 shadow-[0px_4px_12px_rgba(30,58,138,0.08)]">
-    <nav class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-16">
-        <div class="flex items-center gap-stack-lg">
-            <a class="font-headline-md text-headline-md font-bold text-on-primary" href="{% url 'index' %}">자소서 메이트</a>
-            
-            <div class="hidden md:flex gap-gutter items-center h-full">
-                <a class="border-b-4 border-secondary text-on-primary font-bold pb-1 font-body-md text-body-md" href="{% url 'index' %}">홈</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'jobs:company_analysis' %}">기업 분석</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'jobs:ai_matching' %}">AI 매칭 & 자소서</a>
-                <a class="text-on-primary/80 hover:text-on-primary transition-colors font-body-md text-body-md" href="{% url 'jobs:my_spec' %}">내 스펙</a>
-            </div>
-            </div>
-        <div class="flex items-center gap-stack-md">
-            <button class="material-symbols-outlined text-on-primary p-2 hover:bg-primary-fixed/10 rounded-full transition-all active:scale-95">notifications</button>
-            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed/20">
-                <img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXp50DcKKiSscua7T66IPGt4GspQvY3kWxh9oU5Yk8SC1gSX3SeY7SF1VNbW0CdgHNvmGfD8zJiXx2R27youMu-VXCOQnX0SzRynmspCvN4If_rv5k6YaAwuMUPbwh0h9NiI3D1QbPlMVU3eejiuKmDdj79yc6vFgmibSCsA08LDBmKSYYo97sm4cWiy6ODKorS8-GvEyRDwu0j_NQAb9UeKxkyMLo88U0fCOePFGiY8U10LxZAHAGdPTbmUsuQCSFtTzcQnZFlLVI"/>
-            </div>
-        </div>
-    </nav>
-</header>
+{% block title %}자소서 메이트 - 당신의 AI 취업 비서{% endblock %}
 
-<main class="pt-16">
-    <section class="relative min-h-[819px] flex items-center overflow-hidden">
-        <div class="absolute inset-0 z-0">
-            <div class="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent z-10"></div>
-            <img alt="Hero background" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkPl4T777kjypCeNQPQW0NvhiZ8LuqxnVXDUZ6qJBl-Pi4_JqIhweay-ZFhOBcMBM_8Bu-m_QJt5nl4_DlLKB6JUmoqgTMLK3H5XgLuHDhGOc8eG9I-TFXyM8NrD10PZ0vufKAhS7krWP7Z0yO3oyzB-9X_JIISzwqoNR4_S0Iff0WfRgLcjFcz-Bq99uEt1ZmSGWo6Ms9Ws5ncjRtiPLtGGE_Z6T4fXaiU6u4uf-gaIoxa4yN05iZVJuF02uF49ENb2A5wyHSMDCp"/>
+{% block content %}
+<!-- Hero Section -->
+<div class="relative overflow-hidden bg-slate-50 pt-20 pb-32 border-b border-slate-200">
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-30"></div>
+    <div class="relative max-w-6xl mx-auto px-6 text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-sm mb-8 animate-bounce shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> 최신 GPT AI 분석 엔진 탑재
         </div>
-        <div class="relative z-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full py-stack-lg">
-            <div class="max-w-2xl text-on-primary">
-                <h1 class="font-display text-display mb-stack-md leading-tight">
-                    당신의 스펙으로 찾는<br/><span class="text-secondary-fixed">최적의 커리어, 자소서 메이트</span>
-                </h1>
-                <p class="font-body-lg text-body-lg mb-stack-lg text-on-primary-container/90">
-                    인공지능이 분석한 5,000개 이상의 기업 데이터와 당신의 커리어 패스를 정밀 매칭합니다. 정체된 성장이 아닌, 도약을 위한 데이터 기반 커리어 솔루션을 경험하세요.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-stack-md">
-                    <a href="{% url 'jobs:dashboard' %}" class="px-8 py-4 bg-secondary text-on-secondary rounded-lg font-bold hover:bg-secondary-container transition-all active:scale-95 flex items-center justify-center gap-2">
-                        지금 시작하기
-                        <span class="material-symbols-outlined">trending_flat</span>
-                    </a>
-                    <a href="#features" class="px-8 py-4 border-2 border-on-primary text-on-primary rounded-lg font-bold hover:bg-on-primary/10 transition-all flex items-center justify-center">
-                        서비스 둘러보기
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="features" class="py-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-        <div class="text-center mb-16">
-            <span class="text-secondary font-bold tracking-widest uppercase text-label-md">주요 기능</span>
-            <h2 class="font-headline-lg text-headline-lg mt-2">커리어 성장을 위한 정교한 도구</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-            <div class="bg-surface-container-lowest p-stack-lg rounded-xl border border-outline-variant shadow-[0px_4px_12px_rgba(30,58,138,0.08)] hover:shadow-[0px_8px_24px_rgba(30,58,138,0.12)] transition-all group">
-                <div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center mb-stack-md group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">analytics</span>
-                </div>
-                <h3 class="font-title-lg text-title-lg mb-2">AI 기업 분석</h3>
-                <p class="text-on-surface-variant font-body-md text-body-md">회사의 비전, 최신 뉴스 이슈, 주력 사업 등 수만 개의 데이터를 학습한 AI가 기업의 실질적 가치를 다각도로 정밀 분석합니다.</p>
-            </div>
-            <div class="bg-surface-container-lowest p-stack-lg rounded-xl border border-outline-variant shadow-[0px_4px_12px_rgba(30,58,138,0.08)] hover:shadow-[0px_8px_24px_rgba(30,58,138,0.12)] transition-all group">
-                <div class="w-12 h-12 bg-secondary-fixed rounded-lg flex items-center justify-center mb-stack-md group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">dataset</span>
-                </div>
-                <h3 class="font-title-lg text-title-lg mb-2">데이터 기반 직무 매칭</h3>
-                <p class="text-on-surface-variant font-body-md text-body-md">단순 키워드 검색이 아닙니다. 귀하의 역량 데이터와 기업의 직무 요구사항 간의 상관관계를 계산하여 최적의 적합도를 산출합니다.</p>
-            </div>
-            <div class="bg-surface-container-lowest p-stack-lg rounded-xl border border-outline-variant shadow-[0px_4px_12px_rgba(30,58,138,0.08)] hover:shadow-[0px_8px_24px_rgba(30,58,138,0.12)] transition-all group">
-                <div class="w-12 h-12 bg-tertiary-fixed rounded-lg flex items-center justify-center mb-stack-md group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">manage_accounts</span>
-                </div>
-                <h3 class="font-title-lg text-title-lg mb-2">커스터마이징 스펙 관리</h3>
-                <p class="text-on-surface-variant font-body-md text-body-md">실시간 시장 트렌드에 맞춰 귀하의 스펙을 어떻게 고도화해야 할지 로드맵을 제안하고 경쟁력을 강화합니다.</p>
-            </div>
-        </div>
-    </section>
-
-    
-</main>
-
-<footer class="bg-surface-container-highest">
-    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-desktop py-stack-lg max-w-container-max mx-auto border-t border-outline-variant">
-        <div class="mb-stack-md md:mb-0">
-            <div class="font-title-lg text-title-lg font-bold text-primary mb-2">자소서 메이트</div>
-            <p class="text-on-surface-variant font-body-sm text-body-sm">© 2026 자소서 메이트. 당신의 커리어 솔루션.</p>
-        </div>
-        <div class="flex flex-wrap justify-center gap-gutter">
-            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">개인정보처리방침</a>
-            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">이용약관</a>
-            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">문의하기</a>
-            <a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-body-sm text-body-sm" href="#">AI 매칭 정보</a>
+        <h1 class="text-5xl md:text-7xl font-extrabold text-slate-800 tracking-tight leading-tight mb-6">
+            내 경험이 합격이 되는 <br class="hidden md:block">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">가장 똑똑한 방법</span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-500 mb-10 max-w-2xl mx-auto font-medium">
+            여기저기 똑같이 넣는 자소서는 이제 그만.<br class="hidden md:block">
+            내 스펙을 꼼꼼히 분석해 나에게 맞는 기업과 매력적인 자소서 초안을 완성해 드릴게요.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            {% if user.is_authenticated %}
+                <a href="{% url 'jobs:ai_matching' %}" class="px-8 py-4 bg-blue-600 text-white text-lg font-bold rounded-2xl hover:bg-blue-700 shadow-lg hover:shadow-blue-600/30 transition-all hover:-translate-y-1">AI 자소서 만들어보기</a>
+                <a href="{% url 'accounts:profile_dashboard' %}" class="px-8 py-4 bg-white text-slate-700 text-lg font-bold rounded-2xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm transition-all">내 스펙 채우기</a>
+            {% else %}
+                <a href="{% url 'accounts:signup' %}" class="px-8 py-4 bg-slate-800 text-white text-lg font-bold rounded-2xl hover:bg-slate-900 shadow-lg hover:shadow-slate-800/30 transition-all hover:-translate-y-1">3초 만에 시작하기</a>
+            {% endif %}
         </div>
     </div>
-</footer>
+</div>
 
-<script>
-    // Smooth scroll for internal links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const targetId = this.getAttribute('href');
-            if(targetId === '#') return;
-            e.preventDefault();
-            document.querySelector(targetId).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
-
-    // Simple animation on scroll
-    const observerOptions = { threshold: 0.1 };
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('opacity-100', 'translate-y-0');
-                entry.target.classList.remove('opacity-0', 'translate-y-10');
-            }
-        });
-    }, observerOptions);
-
-    document.querySelectorAll('section > div > div').forEach(el => {
-        el.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-10');
-        observer.observe(el);
-    });
-</script>
-</body>
-</html>
+<!-- Features Section -->
+<div class="py-24 bg-white">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-extrabold text-slate-800 mb-4">막막한 취업 준비, AI가 다 알아서</h2>
+            <p class="text-slate-500 font-medium">복잡한 기업 분석부터 자소서 초안까지, 나에게 딱 맞게 챙겨드려요.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Feature 1 (딥러닝 기업 분석) -->
+            <a href="{% url 'jobs:company_analysis' %}" class="block p-8 rounded-3xl bg-white border border-slate-200 hover:border-green-300 hover:shadow-xl transition-all duration-300 group">
+                <div class="w-16 h-16 bg-green-50 group-hover:bg-green-100 rounded-2xl flex items-center justify-center text-3xl mb-6 transition-colors">📈</div>
+                <h3 class="text-xl font-extrabold text-slate-800 mb-3 group-hover:text-green-600 transition-colors">AI 기업 분석 →</h3>
+                <p class="text-slate-500 font-medium leading-relaxed">최신 뉴스부터 재무 정보까지 싹 모아서, 면접과 자소서에 꼭 필요한 알짜배기 정보만 꼼꼼하게 요약해 드릴게요.</p>
+            </a>
+            <!-- Feature 2 (AI 맞춤형 자소서) -->
+            <a href="{% url 'jobs:ai_matching' %}" class="block p-8 rounded-3xl bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-xl transition-all duration-300 group">
+                <div class="w-16 h-16 bg-indigo-50 group-hover:bg-indigo-100 rounded-2xl flex items-center justify-center text-3xl mb-6 transition-colors">✨</div>
+                <h3 class="text-xl font-extrabold text-slate-800 mb-3 group-hover:text-indigo-600 transition-colors">나만의 맞춤 자소서 →</h3>
+                <p class="text-slate-500 font-medium leading-relaxed">어떤 경험을 하셨는지 분석해서 지원 기업이 딱 좋아할 만한 매력적인 자소서 초안을 뚝딱 만들어 드려요.</p>
+            </a>
+            <!-- Feature 3 (스마트 공고 매칭) -->
+            <a href="{% url 'jobs:my_spec' %}" class="block p-8 rounded-3xl bg-white border border-slate-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 group">
+                <div class="w-16 h-16 bg-blue-50 group-hover:bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mb-6 transition-colors">🎯</div>
+                <h3 class="text-xl font-extrabold text-slate-800 mb-3 group-hover:text-blue-600 transition-colors">나에게 딱 맞는 공고 추천 →</h3>
+                <p class="text-slate-500 font-medium leading-relaxed">수많은 채용 공고 중에서 내 스펙과 역량에 가장 잘 맞는 알짜 기업만 쏙쏙 골라 스마트하게 추천해 드릴게요.</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

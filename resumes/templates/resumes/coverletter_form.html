@@ -22,13 +22,13 @@
         {% csrf_token %}
         <div>
             <label for="title" class="block text-sm font-medium text-gray-700">자기소개서 제목</label>
-            <input type="text" id="title" name="title" value="{{ coverletter.title|default_if_none:'' }}" required
+            <input type="text" id="title" name="title" value="{% if coverletter %}{{ coverletter.title }}{% else %}{{ default_title|default:'' }}{% endif %}" required
                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
         </div>
         <div>
             <label for="content" class="block text-sm font-medium text-gray-700">자기소개서 내용</label>
             <textarea id="content" name="content" rows="15"
-                      class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">{{ coverletter.content|default_if_none:'' }}</textarea>
+                      class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">{% if coverletter %}{{ coverletter.content }}{% else %}{{ default_content|default:'' }}{% endif %}</textarea>
         </div>
         <div class="flex justify-between">
             <button type="submit"

@@ -14,19 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 # 커리어인사이트/urls.py
 from django.contrib import admin
 from django.urls import path, include
+
 # 💡 1. 아래의 RedirectView를 import 해주세요!
-from django.views.generic import RedirectView 
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    path('accounts/', include('accounts.urls')),
-    path('allauth/', include('allauth.urls')),
-    path('resumes/', include('resumes.urls')),
-    path('admin/', admin.site.urls),
-    path('jobs/', include('jobs.urls')),
-    
+    path("accounts/", include("accounts.urls")),
+    path("allauth/", include("allauth.urls")),
+    path("resumes/", include("resumes.urls")),
+    path("admin/", admin.site.urls),
+    path("jobs/", include("jobs.urls")),
     # 💡 2. 아무것도 안 쓴 빈 주소('')로 들어오면 자동으로 jobs/ 로 이동시킵니다.
-    path('', RedirectView.as_view(url='jobs/', permanent=True), name='index'),
+    path("", RedirectView.as_view(url="jobs/", permanent=True), name="index"),
 ]
