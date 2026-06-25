@@ -28,6 +28,7 @@ urlpatterns = [
     path("resumes/", include("resumes.urls")),
     path("admin/", admin.site.urls),
     path("jobs/", include("jobs.urls")),
+    path("community/", include("community.urls")),
     # 💡 2. 아무것도 안 쓴 빈 주소('')로 들어오면 자동으로 jobs/ 로 이동시킵니다.
     path("", RedirectView.as_view(url="jobs/", permanent=True), name="index"),
 ]
