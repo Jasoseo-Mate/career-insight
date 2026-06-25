@@ -1,4 +1,4 @@
-# Career Insight (커리어 인사이트)
+# Jasoseo Mate (자소서 메이트)
 
 이 프로젝트는 Django 기반의 커리어/구직 관리 및 매칭 서비스입니다.
 
